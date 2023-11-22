@@ -22,70 +22,71 @@ from datetime import datetime
 
 # 写入json文件
 
-def read_model():
-    # 读取不同的分类模型
-    dict_class_names = dict()
-    dict_class_names['weather'] = ['clear_weather', 'cloudy', 'foggy', 'rainning', 'snowy']
-    dict_class_names['abnormal_condition'] = ['cracked', 'normal', 'standing_water', 'uneven', 'water']
-    dict_class_names['scerario'] = ['city_road', 'expressway', 'gas_station', 'parking', 'suburbs', 'tunnel']
-    dict_class_names['road_structure'] = ['T-junction', 'crossroad', 'lane_merging', 'normal_road', 'parking-lot', 'ramp', 'round-about']
-    dict_class_names['period'] = ['dawn-or-dusk', 'daytime', 'night', 'unknown']
+# def read_model():
+#     # 读取不同的分类模型
+#     dict_class_names = dict()
+#     dict_class_names['weather'] = ['clear_weather', 'cloudy', 'foggy', 'rainning', 'snowy']
+#     dict_class_names['abnormal_condition'] = ['cracked', 'normal', 'standing_water', 'uneven', 'water']
+#     dict_class_names['scerario'] = ['city_road', 'expressway', 'gas_station', 'parking', 'suburbs', 'tunnel']
+#     dict_class_names['road_structure'] = ['T-junction', 'crossroad', 'lane_merging', 'normal_road', 'parking-lot', 'ramp', 'round-about']
+#     dict_class_names['period'] = ['dawn-or-dusk', 'daytime', 'night', 'unknown']
     
-    dict_class_names['general_obstacle'] = ['speed bumper', 'traffic cone', 'manhole cover', 'water horse', 'stone', 'nothing']
-    # ['bumper', 'cone', 'hole', 'square', 'stone','nothing'] # origin classes
-    dict_class_names['closest_participants_type'] = ['bus', 'passenger car', 'pedestrain', 'policeman', 'truck', 'nothing']
-    dict_class_names['ego_car_behavior'] = ['slow down', 'go straight', 'turn right', 'turn left', 'stop', 'U-turn', 'speed up', 'lane change', 'others']
-    dict_class_names['closest_participants_behavior'] = ['slow down', 'go straight', 'turn right', 'turn left', 'stop', 'U-turn', 'speed up', 'lane change' ,'others']
-    # 在补充完整后面三个类之前不要运行脚本。
+#     dict_class_names['general_obstacle'] = ['speed bumper', 'traffic cone', 'manhole cover', 'water horse', 'stone', 'nothing']
+#     # ['bumper', 'cone', 'hole', 'square', 'stone','nothing'] # origin classes
+#     dict_class_names['closest_participants_type'] = ['bus', 'passenger car', 'pedestrain', 'policeman', 'truck', 'nothing']
+#     dict_class_names['ego_car_behavior'] = ['slow down', 'go straight', 'turn right', 'turn left', 'stop', 'U-turn', 'speed up', 'lane change', 'others']
+#     dict_class_names['closest_participants_behavior'] = ['slow down', 'go straight', 'turn right', 'turn left', 'stop', 'U-turn', 'speed up', 'lane change' ,'others']
+#     # 在补充完整后面三个类之前不要运行脚本。
     
-    dict_model = dict()
+#     dict_model = dict()
     
-    dict_dir_path = dict()
-    dict_dir_path['period'] = './classification_models/daytime'
-    dict_dir_path['weather'] = './classification_models/weather'
-    dict_dir_path['scerario'] = './classification_models/scerario'
-    dict_dir_path['road_structure'] = './classification_models/roadStructure'
-    dict_dir_path['abnormal_condition'] = './classification_models/abnormal_road'
+#     dict_dir_path = dict()
+#     dict_dir_path['period'] = './classification_models/daytime'
+#     dict_dir_path['weather'] = './classification_models/weather'
+#     dict_dir_path['scerario'] = './classification_models/scerario'
+#     dict_dir_path['road_structure'] = './classification_models/roadStructure'
+#     dict_dir_path['abnormal_condition'] = './classification_models/abnormal_road'
     
-    dict_dir_path['general_obstacle'] = './detection_models/detection_obstacle'
-    dict_dir_path['closest_participants_type'] = './detection_models/detection_car'
-    dict_dir_path['ego_car_behavior'] = './detection_models/ego_car_behavior'
-    dict_dir_path['closest_participants_behavior'] = './detection_models/closest_participants_behavior'
+#     dict_dir_path['general_obstacle'] = './detection_models/detection_obstacle'
+#     dict_dir_path['closest_participants_type'] = './detection_models/detection_car'
+#     dict_dir_path['ego_car_behavior'] = './detection_models/ego_car_behavior'
+#     dict_dir_path['closest_participants_behavior'] = './detection_models/closest_participants_behavior'
     
-    model_filename = 'resnet_50_in418_out5_ft.pth'
+#     model_filename = 'resnet_50_in418_out5_ft.pth'
     
-    yolo_model_filename = 'best.pt'
+#     yolo_model_filename = 'best.pt'
 
-    # from a github repo load pytorch base model
-    # repo = 'pytorch/vision'
-    # model_ft = torch.hub.load(repo, 'resnet50', weights='ResNet50_Weights.IMAGENET1K_V1')
+#     # from a github repo load pytorch base model
+#     # repo = 'pytorch/vision'
+#     # model_ft = torch.hub.load(repo, 'resnet50', weights='ResNet50_Weights.IMAGENET1K_V1')
 
-    # 使用预训练的 ResNet-50 模型
-    model_ft = models.resnet50(pretrained=False)  # 设为True以加载预训练权重
-    num_ftrs = model_ft.fc.in_features
+#     # 使用预训练的 ResNet-50 模型
+#     model_ft = models.resnet50(pretrained=False)  # 设为True以加载预训练权重
+#     num_ftrs = model_ft.fc.in_features
 
-    # 不同的模型有不同的class_names
-    for key, value in dict_class_names.items():
+#     # 不同的模型有不同的class_names
+#     for key, value in dict_class_names.items():
         
-        if key in ['period', 'weather', 'scerario', 'road_structure', 'abnormal_condition']:
-            # classification
-            model_temp = model_ft
-            model_temp.fc = nn.Linear(num_ftrs, len(value))
-            dict_model[key] = model_temp
-            dict_model[key] = dict_model[key].to(device)
+#         if key in ['period', 'weather', 'scerario', 'road_structure', 'abnormal_condition']:
+#             # classification
+#             model_temp = model_ft
+#             model_temp.fc = nn.Linear(num_ftrs, len(value))
+            
+#             dict_model[key] = model_temp.to(device)
 
-            model_path = os.path.join(dict_dir_path[key], model_filename)
-            dict_model[key].load_state_dict(torch.load(model_path))
-            dict_model[key].eval()
+#             model_path = os.path.join(dict_dir_path[key], model_filename)
+#             print(model_path)
+#             dict_model[key].load_state_dict(torch.load(model_path))
+#             dict_model[key].eval()
             
-        elif key in ['general_obstacle', 'closest_participants_type']:
-            # object detection and distance estimation
-            model_det = YOLO(os.path.join(dict_dir_path[key], yolo_model_filename))  # load a custom model
-            dict_model[key] = model_det
-        else:
-            continue
+#         elif key in ['general_obstacle', 'closest_participants_type']:
+#             # object detection and distance estimation
+#             model_det = YOLO(os.path.join(dict_dir_path[key], yolo_model_filename))  # load a custom model
+#             dict_model[key] = model_det
+#         else:
+#             continue
             
-    return dict_model, dict_class_names
+#     return dict_model, dict_class_names
 
 # 读取video
 def find_mp4_files(folder_path):
@@ -97,7 +98,7 @@ def find_mp4_files(folder_path):
 
 def classification(image, model, class_names, device):
     # Make a prediction
-    
+
     if image is not None:
         # Make predictions
         transform = transforms.Compose([
@@ -166,13 +167,16 @@ def get_yymmdd():
 
     return yymmdd
 
+import string
+
 if __name__ == '__main__':
     # find device, cpu or gpu
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
     
     # 加载pytorch resnet50分类模型
-    models, classes = read_model()
+    # models, classes = read_model()
+
     # 加载待检测的MP4文件
     mp4_folder = 'F:\Video\Tianchi_combo/test_video_mp4'
     
@@ -184,9 +188,17 @@ if __name__ == '__main__':
 
     for mp4 in list_mp4:
         index = 1
-        # 视频名字提取
+        mp4_file_path = os.path.join(mp4_folder, mp4)
+        print(mp4_file_path)
+        
+        # 视频名字提取 并修改
         video_name = extract_prefix(mp4)
-        data_piece = {'clip_id': video_name,
+        if video_name < '60':
+            mp4 = video_name + '.avi'
+        else:
+            mp4 = video_name + '.mp4'
+            
+        data_piece = {'clip_id': mp4,
             'scerario':'cityroad',
             'weather':'unknown',
             'period':'night',
@@ -197,16 +209,17 @@ if __name__ == '__main__':
             'closest_participants_type':'passenger car',
             'closest_participants_behavior':'go straight'
             }
-        mp4_file_path = os.path.join(mp4_folder, mp4)
-        print(mp4_file_path)
+        
+        
         try:
-            extract_freq = 3*30 #间隔视频帧, 一个视频取一帧足够了
+            extract_freq = 4*30 #间隔视频帧, 一个视频取一帧足够了
 
             cap = cv2.VideoCapture()
             if not cap.open(mp4_file_path):
                 print('fail open mp4 file')
                 exit(1)
             count = 1
+            predicted_class_name = ''
             while True:
                 _,frame = cap.read()
                 if frame is None:
@@ -217,44 +230,158 @@ if __name__ == '__main__':
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     # Convert the NumPy array to a PIL Image
                     pil_image = Image.fromarray(frame_rgb)
-                    for key, model in models.items():
-                        if key in ['period', 'weather', 'scerario', 'road_structure', 'abnormal_condition']:
+                    
+                    for key in ['period', 'weather', 'scerario', 'road_structure', 'abnormal_condition', 'closest_participants_type', 'ego_car_behavior', 'closest_participants_behavior']:
+                        print('key is {}'.format(key))
+                        if key == 'period':
+                            cls_one = ['dawn-or-dusk', 'daytime', 'night', 'unknown']
+                            # 使用预训练的 ResNet-50 模型
+                            model_ft = models.resnet50(pretrained=False)  # 设为True以加载预训练权重
+                            num_ftrs = model_ft.fc.in_features
 
+                            model_ft.fc = nn.Linear(num_ftrs, len(cls_one))
+                            model_first = model_ft
+                            model_first = model_first.to(device)
+                            folder_first = './classification_models/daytime'
+                            model_filename = 'resnet_50_in418_out5_ft.pth'
+
+                            model_path = os.path.join(folder_first, model_filename)
+                            # print(model_path)
+                            model_first.load_state_dict(torch.load(model_path))
+                            model_first.eval()
+                        
                             # 预测类别，概率
-                            predicted_class_index, predicted_class_name, predicted_probability = classification(pil_image, model, classes[key], device)
-                            
+                            _, predicted_class_name, _ = classification(pil_image, model_first, cls_one, device)
+                        
+                            if predicted_class_name == 'dawn-or-dusk':
+                                predicted_class_name = 'dawn or dusk'
+                            # 更新分类结果
+                            data_piece[key] = predicted_class_name  
+                        if key == 'weather':
+                            cls_one = ['clear_weather', 'cloudy', 'foggy', 'rainning', 'snowy']
+                            # 使用预训练的 ResNet-50 模型
+                            model_ft = models.resnet50(pretrained=False)  # 设为True以加载预训练权重
+                            num_ftrs = model_ft.fc.in_features
+
+                            model_ft.fc = nn.Linear(num_ftrs, len(cls_one))
+                            model_first = model_ft
+                            model_first = model_first.to(device)
+                            folder_first = './classification_models/weather'
+                            model_filename = 'resnet_50_in418_out5_ft.pth'
+
+                            model_path = os.path.join(folder_first, model_filename)
+                            # print(model_path)
+                            model_first.load_state_dict(torch.load(model_path))
+                            model_first.eval()
+                        
+                            # 预测类别，概率
+                            _, predicted_class_name, _ = classification(pil_image, model_first, cls_one, device)
                             # 名词修改
-                            if key == 'weather':
-                                if predicted_class_name == 'clear_weather':
-                                    predicted_class_name = 'clear'
-                                
-                            if key == 'abnormal_condition':
-                                if predicted_class_name == 'normal':
-                                    predicted_class_name = 'nothing'
-                                elif predicted_class_name == 'water':
-                                    predicted_class_name = 'oil or water stain'
-                                elif predicted_class_name == 'standing_water':
-                                    predicted_class_name = 'standing water'
-                                
-                            if key == 'period':
-                                if predicted_class_name == 'dawn-or-dusk':
-                                    predicted_class_name = 'dawn or dusk'
-                                    
-                            if key == 'scerario':
-                                if predicted_class_name == 'city_road':
-                                    predicted_class_name = 'city street'
-                                elif predicted_class_name == 'parking':
-                                    predicted_class_name = 'parking-lot'
-                                elif predicted_class_name == 'gas_station':
-                                    predicted_class_name = 'gas or charging stations'
-                            
+                            if predicted_class_name == 'clear_weather':
+                                predicted_class_name = 'clear'
+                            # 更新分类结果
                             data_piece[key] = predicted_class_name
+                        if key == 'abnormal_condition':
+                            cls_one = ['cracked', 'normal', 'standing_water', 'uneven', 'water']
+                            # 使用预训练的 ResNet-50 模型
+                            model_ft = models.resnet50(pretrained=False)  # 设为True以加载预训练权重
+                            num_ftrs = model_ft.fc.in_features
+
+                            model_ft.fc = nn.Linear(num_ftrs, len(cls_one))
+                            model_first = model_ft
+                            model_first = model_first.to(device)
+                            folder_first = './classification_models/abnormal_road'
+                            model_filename = 'resnet_50_in418_out5_ft.pth'
+
+                            model_path = os.path.join(folder_first, model_filename)
+                            # print(model_path)
+                            model_first.load_state_dict(torch.load(model_path))
+                            model_first.eval()
+                        
+                            # 预测类别，概率
+                            _, predicted_class_name, _ = classification(pil_image, model_first, cls_one, device)
+                            
+                            if predicted_class_name == 'normal':
+                                predicted_class_name = 'nothing'
+                            elif predicted_class_name == 'water':
+                                predicted_class_name = 'oil or water stain'
+                            elif predicted_class_name == 'standing_water':
+                                predicted_class_name = 'standing water'
+                        
+                            # 更新分类结果
+                            data_piece[key] = predicted_class_name
+                        if key == 'scerario':
+                            cls_one = ['city_road', 'expressway', 'gas_station', 'parking', 'suburbs', 'tunnel']
+                            # 使用预训练的 ResNet-50 模型
+                            model_ft = models.resnet50(pretrained=False)  # 设为True以加载预训练权重
+                            num_ftrs = model_ft.fc.in_features
+
+                            model_ft.fc = nn.Linear(num_ftrs, len(cls_one))
+                            model_first = model_ft
+                            model_first = model_first.to(device)
+                            folder_first = './classification_models/scerario'
+                            model_filename = 'resnet_50_in418_out5_ft.pth'
+
+                            model_path = os.path.join(folder_first, model_filename)
+                            # print(model_path)
+                            model_first.load_state_dict(torch.load(model_path))
+                            model_first.eval()
+                        
+                            # 预测类别，概率
+                            _, predicted_class_name, _ = classification(pil_image, model_first, cls_one, device)
+                            
+                            if predicted_class_name == 'city_road':
+                                predicted_class_name = 'city street'
+                            elif predicted_class_name == 'parking':
+                                predicted_class_name = 'parking-lot'
+                            elif predicted_class_name == 'gas_station':
+                                predicted_class_name = 'gas or charging stations'
+                        
+                            # 更新分类结果
+                            data_piece[key] = predicted_class_name
+                        if key == 'road_structure':
+                            cls_one = ['T-junction', 'crossroad', 'lane_merging', 'normal_road', 'parking-lot', 'ramp', 'round-about']
+                            # 使用预训练的 ResNet-50 模型
+                            model_ft = models.resnet50(pretrained=False)  # 设为True以加载预训练权重
+                            num_ftrs = model_ft.fc.in_features
+
+                            model_ft.fc = nn.Linear(num_ftrs, len(cls_one))
+                            model_first = model_ft
+                            model_first = model_first.to(device)
+                            folder_first = './classification_models/roadStructure'
+                            model_filename = 'resnet_50_in418_out5_ft.pth'
+
+                            model_path = os.path.join(folder_first, model_filename)
+                            # print(model_path)
+                            model_first.load_state_dict(torch.load(model_path))
+                            model_first.eval()
+                        
+                            # 预测类别，概率
+                            _, predicted_class_name, _ = classification(pil_image, model_first, cls_one, device)
+                            
+                            if predicted_class_name == 'crossroad':
+                                predicted_class_name = 'crossroads'
+                            elif predicted_class_name == 'lane_merging':
+                                predicted_class_name = 'lane merging'
+                            elif predicted_class_name == 'parking-lot':
+                                predicted_class_name = 'parking lot entrance'
+                            elif predicted_class_name == 'normal_road':
+                                predicted_class_name = 'normal'
+                            elif predicted_class_name == 'round-about':
+                                predicted_class_name = 'round about'
+                            # 更新分类结果
+                            data_piece[key] = predicted_class_name
+                            
                         # 目标检测
-                        if key in ['general_obstacle', 'closest_participants_type']:
+                        if key == 'general_obstacle':
+                            cls_one = ['speed bumper', 'traffic cone', 'manhole cover', 'water horse', 'stone', 'nothing']
+                            folder_first = './detection_models/detection_obstacle'
+                            model_filename = 'best.pt'
+                            model_det = YOLO(os.path.join(folder_first, model_filename))
                             # 预测类别
-                            predicted_class, confidence, xyxy = object_detect(pil_image, model)
+                            predicted_class, confidence, xyxy = object_detect(pil_image, model_det)
                             if predicted_class is not None and len(predicted_class) > 0:
-                                predicted_class_name = classes[key][np.argmax(predicted_class.cpu().numpy())] # 取出概率最大的障碍
+                                predicted_class_name = cls_one[np.argmax(predicted_class.cpu().numpy())] # 取出概率最大的障碍
                                 
                                 if predicted_class_name == 'bumper':
                                     predicted_class_name = 'speed bumper'
@@ -269,11 +396,27 @@ if __name__ == '__main__':
                                 predicted_class_name = 'nothing'
                             
                             data_piece[key] = predicted_class_name
-                        
+                        if key == 'closest_participants_type':
+                            cls_one = ['bus', 'passenger car', 'pedestrain', 'policeman', 'truck', 'nothing']
+                            folder_first = './detection_models/detection_car'
+                            model_filename = 'best.pt'
+                            model_det = YOLO(os.path.join(folder_first, model_filename))
+                            # 预测类别
+                            predicted_class, confidence, xyxy = object_detect(pil_image, model_det)
+                            if predicted_class is not None and len(predicted_class) > 0:
+                                predicted_class_name = cls_one[np.argmax(predicted_class.cpu().numpy())] # 取出概率最大的障碍
+                            else:
+                                predicted_class_name = 'nothing'
+                            data_piece[key] = predicted_class_name
                         if key == 'ego_car_behavior':
                             predicted_class_name = 'go straight'
+                            
+                            data_piece[key] = predicted_class_name
                         elif key == 'closest_participants_behavior':
                             predicted_class_name = 'go straight'
+                            
+                            data_piece[key] = predicted_class_name
+                            
                     index += 1
                 count += 1
 
@@ -284,7 +427,7 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"提取帧失败：{mp4_file_path}\n错误信息：{e}")
     # 所有视频处理完成，保存json文件
-    with open(os.path.join(output_folder, 'test_results.json'), 'w') as f:
+    with open(os.path.join(output_folder, 'clip_result.json'), 'w') as f:
         json.dump(data, f, indent=4)
 
 # 目标检测并保存检测结果
