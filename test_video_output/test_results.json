@@ -1,0 +1,67 @@
+{
+    "author": "abc",
+    "time": "231123",
+    "model": "model_name",
+    "test_results": [
+        {
+            "clip_id": "08",
+            "scerario": "expressway",
+            "weather": "cloudy",
+            "period": "daytime",
+            "road_structure": "crossroad",
+            "general_obstacle": "nothing",
+            "abnormal_condition": "nothing",
+            "ego_car_behavior": "go straight",
+            "closest_participants_type": "nothing",
+            "closest_participants_behavior": "go straight"
+        },
+        {
+            "clip_id": "11",
+            "scerario": "expressway",
+            "weather": "cloudy",
+            "period": "daytime",
+            "road_structure": "crossroad",
+            "general_obstacle": "nothing",
+            "abnormal_condition": "nothing",
+            "ego_car_behavior": "go straight",
+            "closest_participants_type": "nothing",
+            "closest_participants_behavior": "go straight"
+        },
+        {
+            "clip_id": "12",
+            "scerario": "expressway",
+            "weather": "cloudy",
+            "period": "daytime",
+            "road_structure": "crossroad",
+            "general_obstacle": "nothing",
+            "abnormal_condition": "nothing",
+            "ego_car_behavior": "go straight",
+            "closest_participants_type": "nothing",
+            "closest_participants_behavior": "go straight"
+        },
+        {
+            "clip_id": "25",
+            "scerario": "expressway",
+            "weather": "cloudy",
+            "period": "daytime",
+            "road_structure": "crossroad",
+            "general_obstacle": "nothing",
+            "abnormal_condition": "nothing",
+            "ego_car_behavior": "go straight",
+            "closest_participants_type": "nothing",
+            "closest_participants_behavior": "go straight"
+        },
+        {
+            "clip_id": "49",
+            "scerario": "gas or charging stations",
+            "weather": "foggy",
+            "period": "night",
+            "road_structure": "lane_merging",
+            "general_obstacle": "nothing",
+            "abnormal_condition": "standing water",
+            "ego_car_behavior": "go straight",
+            "closest_participants_type": "nothing",
+            "closest_participants_behavior": "go straight"
+        }
+    ]
+}

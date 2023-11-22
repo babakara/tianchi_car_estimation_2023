@@ -1,17 +1,12 @@
 from ultralytics import YOLO
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.optim import lr_scheduler
-import torch.backends.cudnn as cudnn
+import torchvision.models as models
 import numpy as np
-import torchvision
-from torchvision import datasets, models, transforms
-import matplotlib.pyplot as plt
-import time
+from torchvision import models, transforms
+
 import os
 from PIL import Image
-from tempfile import TemporaryDirectory
 
 import cv2
 
@@ -36,8 +31,9 @@ def read_model():
     dict_class_names['road_structure'] = ['T-junction', 'crossroad', 'lane_merging', 'normal_road', 'parking-lot', 'ramp', 'round-about']
     dict_class_names['period'] = ['dawn-or-dusk', 'daytime', 'night', 'unknown']
     
-    dict_class_names['general_obstacle'] = ['nothing', 'speed bumper', 'traffic cone', 'water horse', 'stone', 'manhole cover', 'unknown']
-    dict_class_names['closest_participants_type'] = ['passenger car', 'bus', 'truck', 'pedestrain', 'policeman', 'nothing']
+    dict_class_names['general_obstacle'] = ['speed bumper', 'traffic cone', 'manhole cover', 'water horse', 'stone', 'nothing']
+    # ['bumper', 'cone', 'hole', 'square', 'stone','nothing'] # origin classes
+    dict_class_names['closest_participants_type'] = ['bus', 'passenger car', 'pedestrain', 'policeman', 'truck', 'nothing']
     dict_class_names['ego_car_behavior'] = ['slow down', 'go straight', 'turn right', 'turn left', 'stop', 'U-turn', 'speed up', 'lane change', 'others']
     dict_class_names['closest_participants_behavior'] = ['slow down', 'go straight', 'turn right', 'turn left', 'stop', 'U-turn', 'speed up', 'lane change' ,'others']
     # 在补充完整后面三个类之前不要运行脚本。
@@ -52,7 +48,7 @@ def read_model():
     dict_dir_path['abnormal_condition'] = './classification_models/abnormal_road'
     
     dict_dir_path['general_obstacle'] = './detection_models/detection_obstacle'
-    dict_dir_path['closest_participants_type'] = './detection_models/closest_participants_type'
+    dict_dir_path['closest_participants_type'] = './detection_models/detection_car'
     dict_dir_path['ego_car_behavior'] = './detection_models/ego_car_behavior'
     dict_dir_path['closest_participants_behavior'] = './detection_models/closest_participants_behavior'
     
@@ -61,8 +57,11 @@ def read_model():
     yolo_model_filename = 'best.pt'
 
     # from a github repo load pytorch base model
-    repo = 'pytorch/vision'
-    model_ft = torch.hub.load(repo, 'resnet50', weights='ResNet50_Weights.IMAGENET1K_V1')
+    # repo = 'pytorch/vision'
+    # model_ft = torch.hub.load(repo, 'resnet50', weights='ResNet50_Weights.IMAGENET1K_V1')
+
+    # 使用预训练的 ResNet-50 模型
+    model_ft = models.resnet50(pretrained=False)  # 设为True以加载预训练权重
     num_ftrs = model_ft.fc.in_features
 
     # 不同的模型有不同的class_names
@@ -79,10 +78,12 @@ def read_model():
             dict_model[key].load_state_dict(torch.load(model_path))
             dict_model[key].eval()
             
-        elif key in ['general_obstacle']:
+        elif key in ['general_obstacle', 'closest_participants_type']:
             # object detection and distance estimation
             model_det = YOLO(os.path.join(dict_dir_path[key], yolo_model_filename))  # load a custom model
             dict_model[key] = model_det
+        else:
+            continue
             
     return dict_model, dict_class_names
 
@@ -138,19 +139,15 @@ def object_detect(image, model):
     # 查找是否有目标，没有就返回nothing
     # Process results list
     for result in results:
-        boxes = result.boxes  # Boxes object for bbox outputs
-        probs = result.probs  # Probs object for classification outputs
+
+        print('origin_shape is {}'.format(result.orig_shape))
+        predicted_class = result.boxes.cls
+        confidence = result.boxes.conf
+        xyxy = result.boxes.xyxy
         
     # 根据焦距和预先知识计算到相机的距离
-    
-    # 展示结果
-    # for r in results:
-    #     im_array = r.plot()  # 绘制包含预测结果的BGR numpy数组
-    #     im = Image.fromarray(im_array[..., ::-1])  # RGB PIL图像
-    #     im.show()  # 显示图像 im.show()
-    #     im.save('results.jpg')  # 保存图像
-    
-    return results
+
+    return predicted_class, confidence, xyxy
 
 
 # 并从文件名中提取点之前的部分
@@ -196,14 +193,14 @@ if __name__ == '__main__':
             'road_structure':'ramp',
             'general_obstacle':'nothing',
             'abnormal_condition':'nothing',
-            'ego_car_behavior':'turning right',
+            'ego_car_behavior':'go straight',
             'closest_participants_type':'passenger car',
-            'closest_participants_behavior':'braking'
+            'closest_participants_behavior':'go straight'
             }
         mp4_file_path = os.path.join(mp4_folder, mp4)
         print(mp4_file_path)
         try:
-            extract_freq = 4*30 #间隔视频帧, 一个视频取一帧足够了
+            extract_freq = 3*30 #间隔视频帧, 一个视频取一帧足够了
 
             cap = cv2.VideoCapture()
             if not cap.open(mp4_file_path):
@@ -253,7 +250,30 @@ if __name__ == '__main__':
                             
                             data_piece[key] = predicted_class_name
                         # 目标检测
+                        if key in ['general_obstacle', 'closest_participants_type']:
+                            # 预测类别
+                            predicted_class, confidence, xyxy = object_detect(pil_image, model)
+                            if predicted_class is not None and len(predicted_class) > 0:
+                                predicted_class_name = classes[key][np.argmax(predicted_class.cpu().numpy())] # 取出概率最大的障碍
+                                
+                                if predicted_class_name == 'bumper':
+                                    predicted_class_name = 'speed bumper'
+                                elif predicted_class_name == 'hole':
+                                    predicted_class_name = 'manhole cover'
+                                elif predicted_class_name == 'cone':
+                                    predicted_class_name = 'traffic cone'
+                                elif predicted_class_name == 'square':
+                                    predicted_class_name == 'water horse'
+                                
+                            else:
+                                predicted_class_name = 'nothing'
+                            
+                            data_piece[key] = predicted_class_name
                         
+                        if key == 'ego_car_behavior':
+                            predicted_class_name = 'go straight'
+                        elif key == 'closest_participants_behavior':
+                            predicted_class_name = 'go straight'
                     index += 1
                 count += 1
 
@@ -268,3 +288,5 @@ if __name__ == '__main__':
         json.dump(data, f, indent=4)
 
 # 目标检测并保存检测结果
+
+
