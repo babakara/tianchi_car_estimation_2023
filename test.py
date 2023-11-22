@@ -253,7 +253,7 @@ if __name__ == '__main__':
                             
                             data_piece[key] = predicted_class_name
                         # 目标检测
-                         
+                        
                     index += 1
                 count += 1
 
