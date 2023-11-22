@@ -27,8 +27,6 @@ from datetime import datetime
 
 # 写入json文件
 
-
-
 def read_model():
     # 读取不同的分类模型
     dict_class_names = dict()
@@ -181,7 +179,7 @@ if __name__ == '__main__':
     # 加载待检测的MP4文件
     mp4_folder = 'F:\Video\Tianchi_combo/test_video_mp4'
     
-    output_folder = 'F:\Video\Tianchi_combo/test_video_output'
+    output_folder = './test_video_output'
     os.makedirs(output_folder, exist_ok=True)
     list_mp4 = find_mp4_files(mp4_folder)
     
@@ -223,36 +221,39 @@ if __name__ == '__main__':
                     # Convert the NumPy array to a PIL Image
                     pil_image = Image.fromarray(frame_rgb)
                     for key, model in models.items():
-                        # 预测类别，概率
-                        predicted_class_index, predicted_class_name, predicted_probability = classification(pil_image, model, classes[key], device)
-                        
-                        # 名词修改
-                        if key == 'weather':
-                            if predicted_class_name == 'clear_weather':
-                                predicted_class_name = 'clear'
+                        if key in ['period', 'weather', 'scerario', 'road_structure', 'abnormal_condition']:
+
+                            # 预测类别，概率
+                            predicted_class_index, predicted_class_name, predicted_probability = classification(pil_image, model, classes[key], device)
                             
-                        if key == 'abnormal_condition':
-                            if predicted_class_name == 'normal':
-                                predicted_class_name = 'nothing'
-                            elif predicted_class_name == 'water':
-                                predicted_class_name = 'oil or water stain'
-                            elif predicted_class_name == 'standing_water':
-                                predicted_class_name = 'standing water'
-                            
-                        if key == 'period':
-                            if predicted_class_name == 'dawn-or-dusk':
-                                predicted_class_name = 'dawn or dusk'
+                            # 名词修改
+                            if key == 'weather':
+                                if predicted_class_name == 'clear_weather':
+                                    predicted_class_name = 'clear'
                                 
-                        if key == 'scerario':
-                            if predicted_class_name == 'city_road':
-                                predicted_class_name = 'city street'
-                            elif predicted_class_name == 'parking':
-                                predicted_class_name = 'parking-lot'
-                            elif predicted_class_name == 'gas_station':
-                                predicted_class_name = 'gas or charging stations'
-                        
-                        data_piece[key] = predicted_class_name
-                        
+                            if key == 'abnormal_condition':
+                                if predicted_class_name == 'normal':
+                                    predicted_class_name = 'nothing'
+                                elif predicted_class_name == 'water':
+                                    predicted_class_name = 'oil or water stain'
+                                elif predicted_class_name == 'standing_water':
+                                    predicted_class_name = 'standing water'
+                                
+                            if key == 'period':
+                                if predicted_class_name == 'dawn-or-dusk':
+                                    predicted_class_name = 'dawn or dusk'
+                                    
+                            if key == 'scerario':
+                                if predicted_class_name == 'city_road':
+                                    predicted_class_name = 'city street'
+                                elif predicted_class_name == 'parking':
+                                    predicted_class_name = 'parking-lot'
+                                elif predicted_class_name == 'gas_station':
+                                    predicted_class_name = 'gas or charging stations'
+                            
+                            data_piece[key] = predicted_class_name
+                        # 目标检测
+                         
                     index += 1
                 count += 1
 
